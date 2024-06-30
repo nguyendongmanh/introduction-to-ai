@@ -1,68 +1,72 @@
 from global_settings import ROWS, COLS
 import random
 
+
 def break_wall(current, new, grid):
-	if current.y == new.y:
-		if current.x > new.x:
-			grid[current.y][current.x-1].wall = False
-		else:
-			grid[current.y][current.x+1].wall = False
-	else:
-		if current.y > new.y:
-			grid[current.y-1][current.x].wall = False
-		else:
-			grid[current.y+1][current.x].wall = False
+    if current.x == new.x:
+        if current.y > new.y:
+            grid[current.y - 1][current.x].wall = False
+        else:
+            grid[current.y + 1][current.x].wall = False
+    else:
+        if current.x > new.x:
+            grid[current.y][current.x - 1].wall = False
+        else:
+            grid[current.y][current.x + 1].wall = False
+
+
+def get_neighbors(cell, grid):
+    neighbors = []
+    x, y = cell.x, cell.y
+    if x > 1:
+        neighbors.append(grid[y][x - 2])
+    if x < COLS - 2:
+        neighbors.append(grid[y][x + 2])
+    if y > 1:
+        neighbors.append(grid[y - 2][x])
+    if y < ROWS - 2:
+        neighbors.append(grid[y + 2][x])
+    return neighbors
+
 
 def gen_maze(grid):
+    # Đặt tất cả các ô thành tường
+    for y in range(ROWS):
+        for x in range(COLS):
+            grid[y][x].wall = True
 
-	for y in range(ROWS):
-		for x in range(COLS):
-			grid[y][x].wall = True
+    # Chọn ngẫu nhiên một ô bắt đầu
+    start_x = random.randint(0, (COLS // 2) - 1) * 2
+    start_y = random.randint(0, (ROWS // 2) - 1) * 2
+    start = grid[start_y][start_x]
+    start.wall = False
 
-	for y in range(0,ROWS,2):
-		for x in range(0,COLS,2):
-			grid[y][x].wall = False
+    in_maze = {start}
+    remaining_cells = {
+        grid[y][x] for y in range(0, ROWS, 2) for x in range(0, COLS, 2)
+    } - in_maze
 
-	begin = grid[0][0]
-	open_set = []
-	visited = []
-	open_set.append(begin)
-	visited.append(open_set)
+    while remaining_cells:
+        # Chọn ngẫu nhiên một ô còn lại để bắt đầu đường đi ngẫu nhiên
+        walk_start = random.choice(list(remaining_cells))
+        path = [walk_start]
 
-	while len(open_set) > 0:
-		move = []
+        while path[-1] not in in_maze:
+            current = path[-1]
+            neighbors = get_neighbors(current, grid)
+            next_cell = random.choice(neighbors)
+            if next_cell in path:
+                # Nếu ô đã nằm trong đường đi, xóa vòng lặp
+                path = path[: path.index(next_cell) + 1]
+            else:
+                path.append(next_cell)
 
-		#Right
-		if begin.x + 2 < COLS:
-			neighbor = grid[begin.y][begin.x+2]
-			if neighbor not in visited and neighbor.wall == False:
-				move.append(neighbor)
-		
-		#Left
-		if begin.x - 2 >= 0:
-			neighbor = grid[begin.y][begin.x-2]
-			if neighbor not in visited and neighbor.wall == False:
-				move.append(neighbor)
+        # Thêm đường đi vào mê cung
+        for i in range(len(path) - 1):
+            break_wall(path[i], path[i + 1], grid)
+            path[i].wall = False
+            in_maze.add(path[i])
+            remaining_cells.discard(path[i])
 
-		#Up
-		if begin.y - 2 >= 0:
-			neighbor = grid[begin.y-2][begin.x]
-			if neighbor not in visited and neighbor.wall == False:
-				move.append(neighbor)
-
-		#Down	
-		if begin.y + 2 < ROWS:
-			neighbor = grid[begin.y+2][begin.x]
-			if neighbor not in visited and neighbor.wall == False:
-				move.append(neighbor)
-		
-		if len(move) > 0:
-			new = random.choice(move)
-			break_wall(begin, new, grid)
-			begin = new
-			visited.append(begin)
-			open_set.append(begin)
-		else:
-			begin = open_set.pop()
-			if begin != grid[0][0]:
-				begin.wall = False
+        in_maze.add(path[-1])
+        remaining_cells.discard(path[-1])
