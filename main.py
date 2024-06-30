@@ -36,7 +36,7 @@ def draw(grid, path):
                 cell.draw(sc, COLOR_TARGET)
 
         for i, instruction in enumerate(INSTRUCTIONS):
-            text_surface = font.render(instruction, True, (255, 255, 255))
+            text_surface = font.render(instruction, True, WHITE)
             sc.blit(text_surface, (0, WIN_HEIGHT - (len(INSTRUCTIONS) - i) * 20 - 10))
 
 
@@ -286,7 +286,7 @@ def main():
                         while cur_point.prior != start_point:
                             path.append(cur_point.prior)
                             cur_point = cur_point.prior
-            sc.fill((0, 0, 0))
+            sc.fill(BLACK)
         draw(grid, path)
         pygame.display.flip()
         clock.tick(144)
