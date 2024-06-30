@@ -94,3 +94,30 @@ class Search:
                 temp = sorted(temp, key=lambda x: x[0])
                 queue = temp + queue
         return queue, path, searching, g_score, cost, best_path
+
+    @staticmethod
+    def dijkstra(start_point, target_point, queue, path, searching, g_score):
+        f_cur, cur_point = queue.pop(0)
+        cur_point.visited = True
+        if cur_point == target_point:
+            searching = False
+            while cur_point.prior != start_point:
+                path.append(cur_point.prior)
+                cur_point = cur_point.prior
+        else:
+            for neighbor in cur_point.neighbors:
+                point_cur = (cur_point.x, cur_point.y)
+                temp_gScore = g_score[point_cur] + 1
+                point_neighbor = (neighbor.x, neighbor.y)
+                if (
+                    not neighbor.queue
+                    and not neighbor.wall
+                    and temp_gScore < g_score[point_neighbor]
+                ):
+                    g_score[point_neighbor] = temp_gScore
+                    f_score = g_score[point_neighbor]
+                    queue.append((f_score, neighbor))
+                    queue = sorted(queue, key=lambda x: x[0])
+                    neighbor.queue = True
+                    neighbor.prior = cur_point
+        return queue, path, searching, g_score

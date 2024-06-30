@@ -42,7 +42,7 @@ def draw(grid, path):
 
 def main():
     grid = []
-    # Create grid (dimension = rows * cols)
+    # Create grid (dimension = ROWS * COLS)
     for y in range(ROWS):
         arr = []
         for x in range(COLS):
@@ -52,7 +52,7 @@ def main():
     for y in range(ROWS):
         for x in range(COLS):
             grid[y][x].set_neighbors(grid)
-
+    begin = True
     queue = []
     path = []
     best_path = []
@@ -68,6 +68,7 @@ def main():
     g_score = {}
 
     BFS = False
+    DIJKSTRA = False
     ASTAR = False
     BNB = False
 
@@ -121,10 +122,28 @@ def main():
             # Start algorithms
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_c and target_point_set and start_point_set:
-                    BFS = True
-                    begin_search = True
-                elif event.key == pygame.K_a and target_point_set and start_point_set:
-                    ASTAR = True
+                    DIJKSTRA = True
+                    if BNB or ASTAR:
+                        BNB = False
+                        ASTAR = False
+                        start = start_point
+                        target = target_point
+                        queue = []
+                        path = []
+                        best_path = []
+                        cost = float("inf")
+
+                        # Setting basic
+                        begin_search = False
+                        searching = True
+                        g_score = {}
+                        for y in range(ROWS):
+                            for x in range(COLS):
+                                grid[y][x].visited = False
+                                grid[y][x].prior = None
+                                grid[y][x].queue = False
+                        target_point = target
+                        start_point = start
                     begin_search = True
                     queue = []
                     for y in range(ROWS):
@@ -133,9 +152,62 @@ def main():
                     queue.append((0, start_point))
                     point = (start_point.x, start_point.y)
                     g_score[point] = 0
+                elif event.key == pygame.K_a and target_point_set and start_point_set:
+                    ASTAR = True
+                    if BNB or DIJKSTRA:
+                        BNB = False
+                        DIJKSTRA = False
+                        start = start_point
+                        target = target_point
+                        queue = []
+                        path = []
+                        best_path = []
+                        cost = float("inf")
 
+                        # Setting basic
+                        begin_search = False
+                        searching = True
+                        g_score = {}
+                        for y in range(ROWS):
+                            for x in range(COLS):
+                                grid[y][x].visited = False
+                                grid[y][x].prior = None
+                                grid[y][x].queue = False
+                        target_point = target
+                        start_point = start
+
+                    begin_search = True
+                    queue = []
+                    for y in range(ROWS):
+                        for x in range(COLS):
+                            g_score[(x, y)] = float("inf")
+                    queue.append((0, start_point))
+                    point = (start_point.x, start_point.y)
+                    g_score[point] = 0
                 elif event.key == pygame.K_b and target_point_set and start_point_set:
                     BNB = True
+                    if DIJKSTRA or ASTAR:
+                        DIJKSTRA = False
+                        ASTAR = False
+                        start = start_point
+                        target = target_point
+                        queue = []
+                        path = []
+                        best_path = []
+                        cost = float("inf")
+
+                        # Setting basic
+                        begin_search = False
+                        searching = True
+                        g_score = {}
+                        for y in range(ROWS):
+                            for x in range(COLS):
+                                grid[y][x].visited = False
+                                grid[y][x].prior = None
+                                grid[y][x].queue = False
+                        target_point = target
+                        start_point = start
+
                     begin_search = True
                     queue = []
                     for y in range(ROWS):
@@ -146,7 +218,7 @@ def main():
                     point = (start_point.x, start_point.y)
                     g_score[point] = 0
                 elif event.key == pygame.K_r:
-                    BFS = False
+                    DIJKSTRA = False
                     ASTAR = False
                     BNB = False
                     queue = []
@@ -165,7 +237,6 @@ def main():
                     for y in range(ROWS):
                         for x in range(COLS):
                             grid[y][x].set_default()
-                    continue
                 elif event.key == pygame.K_m:
                     gen_maze(grid)
                     continue
@@ -174,11 +245,7 @@ def main():
 
             # While queue don't empty
             if len(queue) > 0 and searching:
-                if BFS:
-                    queue, path, searching = Search.bfs(
-                        start_point, target_point, queue, path, searching
-                    )
-                elif ASTAR:
+                if ASTAR:
                     queue, path, searching, g_score = Search.a_star(
                         start_point,
                         target_point,
@@ -201,9 +268,13 @@ def main():
                             cost,
                             best_path,
                         )
+                elif DIJKSTRA:
+                    queue, path, searching, g_score = Search.dijkstra(
+                        start_point, target_point, queue, path, searching, g_score
+                    )
             else:
                 if searching:
-                    if BFS or ASTAR:
+                    if DIJKSTRA or ASTAR:
                         Tk().wm_withdraw()
                         messagebox.showinfo("No Solution", "There is no solution!")
                         searching = False
@@ -211,10 +282,10 @@ def main():
                         path = best_path
                         searching = False
                         cur_point = path[-1]
+
                         while cur_point.prior != start_point:
                             path.append(cur_point.prior)
                             cur_point = cur_point.prior
-
             sc.fill((0, 0, 0))
         draw(grid, path)
         pygame.display.flip()

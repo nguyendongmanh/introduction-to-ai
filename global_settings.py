@@ -18,7 +18,7 @@ INSTRUCTIONS = [
     "3. Right click to set target",
     "4. Click A run A star",
     "5. Click B run BNB",
-    "6. Click C run BFS",
+    "6. Click C run DIJKSTRA",
     "7. Click R to restart",
     "8. Click M to generate Maze",
 ]
