@@ -10,6 +10,8 @@ COLOR_BEST_PATH = (0, 0, 200)
 COLOR_START = (0, 200, 200)
 COLOR_WALL = (50, 50, 50)
 COLOR_TARGET = (200, 200, 0)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
 INSTRUCTIONS = [
     "Instructions:",
