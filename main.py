@@ -41,6 +41,10 @@ def draw(grid, path):
 
 
 def main():
+    import time
+
+    is_printed = False
+
     grid = []
     # Create grid (dimension = ROWS * COLS)
     for y in range(ROWS):
@@ -52,7 +56,6 @@ def main():
     for y in range(ROWS):
         for x in range(COLS):
             grid[y][x].set_neighbors(grid)
-    begin = True
     queue = []
     path = []
     best_path = []
@@ -71,7 +74,8 @@ def main():
     DIJKSTRA = False
     ASTAR = False
     BNB = False
-
+    start_time = time.time()
+    end_time = time.time()
     while True:
         for event in pygame.event.get():
 
@@ -123,6 +127,8 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_c and target_point_set and start_point_set:
                     DIJKSTRA = True
+                    is_printed = False
+                    start_time = time.time()
                     if BNB or ASTAR:
                         BNB = False
                         ASTAR = False
@@ -154,6 +160,8 @@ def main():
                     g_score[point] = 0
                 elif event.key == pygame.K_a and target_point_set and start_point_set:
                     ASTAR = True
+                    is_printed = False
+                    start_time = time.time()
                     if BNB or DIJKSTRA:
                         BNB = False
                         DIJKSTRA = False
@@ -186,6 +194,8 @@ def main():
                     g_score[point] = 0
                 elif event.key == pygame.K_b and target_point_set and start_point_set:
                     BNB = True
+                    is_printed = False
+                    start_time = time.time()
                     if DIJKSTRA or ASTAR:
                         DIJKSTRA = False
                         ASTAR = False
@@ -221,6 +231,7 @@ def main():
                     DIJKSTRA = False
                     ASTAR = False
                     BNB = False
+                    is_printed = False
                     queue = []
                     path = []
                     best_path = []
@@ -255,6 +266,7 @@ def main():
                         g_score,
                         heuristic,
                     )
+                    end_time = time.time()
                 elif BNB:
                     if len(queue) > 0:
                         queue, path, searching, g_score, cost, best_path = Search.bnb(
@@ -268,10 +280,12 @@ def main():
                             cost,
                             best_path,
                         )
+                    end_time = time.time()
                 elif DIJKSTRA:
                     queue, path, searching, g_score = Search.dijkstra(
                         start_point, target_point, queue, path, searching, g_score
                     )
+                    end_time = time.time()
             else:
                 if searching:
                     if DIJKSTRA or ASTAR:
@@ -286,6 +300,10 @@ def main():
                         while cur_point.prior != start_point:
                             path.append(cur_point.prior)
                             cur_point = cur_point.prior
+                else:
+                    if not is_printed:
+                        print("Time: ", end_time - start_time)
+                        is_printed = True
             sc.fill(BLACK)
         draw(grid, path)
         pygame.display.flip()
