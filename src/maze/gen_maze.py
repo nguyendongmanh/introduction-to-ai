@@ -29,15 +29,18 @@ def get_neighbors(cell, grid):
     return neighbors
 
 
-def gen_maze(grid):
+def gen_maze(grid, start_x: int = -1, start_y: int = -1):
     # Đặt tất cả các ô thành tường
     for y in range(ROWS):
         for x in range(COLS):
             grid[y][x].wall = True
 
     # Chọn ngẫu nhiên một ô bắt đầu
-    start_x = random.randint(0, (COLS // 2) - 1) * 2
-    start_y = random.randint(0, (ROWS // 2) - 1) * 2
+    if start_x == -1:
+        start_x = random.randint(0, (COLS // 2) - 1) * 2
+
+    if start_y == -1:
+        start_y = random.randint(0, (ROWS // 2) - 1) * 2
     start = grid[start_y][start_x]
     start.wall = False
 
